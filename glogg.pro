@@ -55,7 +55,11 @@ SOURCES += \
     src/viewtools.cpp \
     src/encodingspeculator.cpp \
     src/gloggapp.cpp \
-    src/drawhelpers.cpp
+    src/drawhelpers.cpp \
+    src/systemcmd.cpp \
+    src/syscommanddialog.cpp \
+    src/multilineinputdialog.cpp \
+    src/systemcmdstorage.cpp
 
 INCLUDEPATH += src/
 
@@ -104,7 +108,12 @@ HEADERS += \
     src/viewtools.h \
     src/encodingspeculator.h \
     src/gloggapp.h \
-    src/drawhelpers.h
+    src/drawhelpers.h \
+    src/systemcmd.h \
+    src/dbusexternalcom.h \
+    src/syscommanddialog.h \
+    src/multilineinputdialog.h \
+    src/systemcmdstorage.h
 
 isEmpty(BOOST_PATH) {
     message(Building using system dynamic Boost libraries)
@@ -134,7 +143,9 @@ else {
     INCLUDEPATH += $$BOOST_PATH
 }
 
-FORMS += src/optionsdialog.ui
+FORMS += src/optionsdialog.ui \
+    src/syscommanddialog.ui \
+    src/multilineinputdialog.ui
 FORMS += src/filtersdialog.ui
 
 macx {
@@ -320,3 +331,5 @@ else {
 perf {
     QMAKE_CXXFLAGS += -DGLOGG_PERF_MEASURE_FPS
 }
+
+STATECHARTS +=

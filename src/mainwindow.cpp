@@ -50,6 +50,7 @@
 #include "menuactiontooltipbehavior.h"
 #include "tabbedcrawlerwidget.h"
 #include "externalcom.h"
+#include "syscommanddialog.h"
 
 // Returns the size in human readable format
 static QString readableSize( qint64 size );
@@ -255,6 +256,10 @@ void MainWindow::createActions()
     openAction->setStatusTip(tr("Open a file"));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
+    connectAction = new QAction(tr("&Connect..."), this);
+    connectAction->setStatusTip(tr("Connect to"));
+    connect(connectAction, SIGNAL(triggered()), this, SLOT(connectRemote()));
+
     closeAction = new QAction(tr("&Close"), this);
     closeAction->setShortcut(tr("Ctrl+W"));
     closeAction->setStatusTip(tr("Close document"));
@@ -365,6 +370,7 @@ void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu( tr("&File") );
     fileMenu->addAction( openAction );
+    fileMenu->addAction( connectAction );
     fileMenu->addAction( closeAction );
     fileMenu->addAction( closeAllAction );
     fileMenu->addSeparator();
@@ -453,6 +459,15 @@ void MainWindow::open()
             tr("Open file"), defaultDir, tr("All files (*)"));
     if (!fileName.isEmpty())
         loadFile(fileName);
+}
+
+void MainWindow::connectRemote()
+{
+    SysCommandDialog sc;
+
+    sc.exec();
+    sc.show();
+
 }
 
 // Opens a log file from the recent files list
@@ -822,6 +837,7 @@ void MainWindow::keyPressEvent( QKeyEvent* keyEvent )
 bool MainWindow::loadFile( const QString& fileName )
 {
     LOG(logDEBUG) << "loadFile ( " << fileName.toStdString() << " )";
+    cmd_.start();
 
     // First check if the file is already open...
     CrawlerWidget* existing_crawler = dynamic_cast<CrawlerWidget*>(

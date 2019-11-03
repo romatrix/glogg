@@ -42,6 +42,7 @@ using namespace std;
 #include "mainwindow.h"
 #include "savedsearches.h"
 #include "loadingstatus.h"
+#include "systemcmdstorage.h"
 
 #include "externalcom.h"
 
@@ -231,6 +232,9 @@ int main(int argc, char *argv[])
             std::make_shared<SavedSearches>(), QString( "savedSearches" ) );
     GetPersistentInfo().registerPersistable(
             std::make_shared<RecentFiles>(), QString( "recentFiles" ) );
+    GetPersistentInfo().registerPersistable(
+            std::make_shared<SystemCmdStorage>(), QString( "systemCmdStorage" ) );
+
 #ifdef GLOGG_SUPPORTS_VERSION_CHECKING
     GetPersistentInfo().registerPersistable(
             std::make_shared<VersionCheckerConfig>(), QString( "versionChecker" ) );

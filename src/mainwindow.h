@@ -34,6 +34,7 @@
 #include "versionchecker.h"
 #endif
 #include "utils.h"
+#include "systemcmd.h"
 
 class QAction;
 class QActionGroup;
@@ -74,6 +75,7 @@ class MainWindow : public QMainWindow
 
   private slots:
     void open();
+    void connectRemote();
     void openRecentFile();
     void closeTab();
     void closeAll();
@@ -159,6 +161,7 @@ class MainWindow : public QMainWindow
     std::shared_ptr<ExternalCommunicator> externalCommunicator_;
     std::shared_ptr<RecentFiles> recentFiles_;
     QString loadingFileName;
+    SystemCmd cmd_;
 
     // Encoding
     struct EncodingList {
@@ -184,6 +187,7 @@ class MainWindow : public QMainWindow
     QToolBar *toolBar;
 
     QAction *openAction;
+    QAction *connectAction;
     QAction *closeAction;
     QAction *closeAllAction;
     QAction *exitAction;
