@@ -59,7 +59,8 @@ SOURCES += \
     src/systemcmd.cpp \
     src/syscommanddialog.cpp \
     src/multilineinputdialog.cpp \
-    src/systemcmdstorage.cpp
+    src/systemcmdstorage.cpp \
+    src/systemcmdcontroller.cpp
 
 INCLUDEPATH += src/
 
@@ -113,7 +114,8 @@ HEADERS += \
     src/dbusexternalcom.h \
     src/syscommanddialog.h \
     src/multilineinputdialog.h \
-    src/systemcmdstorage.h
+    src/systemcmdstorage.h \
+    src/systemcmdcontroller.h
 
 isEmpty(BOOST_PATH) {
     message(Building using system dynamic Boost libraries)

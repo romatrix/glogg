@@ -3,29 +3,16 @@
 #include <QFileDialog>
 
 
-SysCommandDialog::SysCommandDialog(QDialog *parent) :
+SysCommandDialog::SysCommandDialog(MainWindow& mainWnd, QDialog *parent) :
     QDialog(parent),
-    mCmdStorage(SystemCmdStorage::getStoredInstance())
+    mCmdStorage(SystemCmdStorage::getStoredInstance()),
+    mMainWnd(mainWnd)
 {
     setupUi(this);
 
     for(const QString& name: mCmdStorage->getNames()){
         commandListWidget->addItem(name);
     }
-}
-
-
-void SysCommandDialog::on_OkCloseButtonBox_accepted()
-{
-    mCmdStorage->save();
-    accept();
-    close();
-}
-
-void SysCommandDialog::on_OkCloseButtonBox_rejected()
-{
-    reject();
-    close();
 }
 
 void updateTextWithMultilineInput(const QString& title, QLineEdit* edit)
@@ -112,19 +99,48 @@ void SysCommandDialog::on_removeCommandButton_clicked()
 
 void SysCommandDialog::on_runButton_clicked()
 {
-
+    //mMainWnd.loadFile("/home/mate/projekty/glogg/logs/test.log");
+    emit loadFile( "/home/mate/projekty/glogg/logs/test.log" );
+    close();
 }
 
-void SysCommandDialog::on_commandListWidget_currentRowChanged(int currentRow)
+void SysCommandDialog::saveCurrent(bool saveStorage)
 {
     if(mCurrentCmd){
         mCurrentCmd = getFormData();
         mCmdStorage->updateCommand(*mCurrentCmd);
+
+        if(saveStorage){
+            mCmdStorage->save();
+        }
     }
+}
+
+void SysCommandDialog::on_commandListWidget_currentRowChanged(int currentRow)
+{
+    saveCurrent(false);
 
     const QString name = commandListWidget->item(currentRow)->text();
     const SystemCmdStorage::SystemCmdData cmd = mCmdStorage->getCommand(name);
 
     setFormData(cmd);
     mCurrentCmd = cmd;
+}
+
+void SysCommandDialog::on_OkCloseButtonBox_clicked(QAbstractButton *button)
+{
+    QDialogButtonBox::ButtonRole role = OkCloseButtonBox->buttonRole( button );
+
+    switch(role){
+    case QDialogButtonBox::ApplyRole:
+        saveCurrent(true);
+        break;
+    case QDialogButtonBox::AcceptRole:
+        saveCurrent(true);
+        close();
+        break;
+    case QDialogButtonBox::RejectRole:
+        close();
+        break;
+    }
 }

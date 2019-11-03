@@ -553,7 +553,7 @@ void CrawlerWidget::fileChangedHandler( LogData::MonitoredFileStatus status )
     if ( status == LogData::Truncated ) {
         // Clear all marks (TODO offer the option to keep them)
         logFilteredData_->clearMarks();
-        if ( ! searchInfoLine->text().isEmpty() ) {
+        if ( ! searchInfoLine->toPlainText().isEmpty() ) {
             // Invalidate the search
             logFilteredData_->clearSearch();
             filteredView->updateData();
@@ -738,7 +738,7 @@ void CrawlerWidget::setup()
 
     // Construct the Search Info line
     searchInfoLine = new InfoLine();
-    searchInfoLine->setFrameStyle( QFrame::WinPanel | QFrame::Sunken );
+    searchInfoLine->setFrameStyle( QFrame::Panel | QFrame::Sunken );
     searchInfoLine->setLineWidth( 1 );
     searchInfoLineDefaultPalette = searchInfoLine->palette();
 

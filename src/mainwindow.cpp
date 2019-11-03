@@ -256,9 +256,9 @@ void MainWindow::createActions()
     openAction->setStatusTip(tr("Open a file"));
     connect(openAction, SIGNAL(triggered()), this, SLOT(open()));
 
-    connectAction = new QAction(tr("&Connect..."), this);
-    connectAction->setStatusTip(tr("Connect to"));
-    connect(connectAction, SIGNAL(triggered()), this, SLOT(connectRemote()));
+    systemCommandAction = new QAction(tr("&System command..."), this);
+    systemCommandAction->setStatusTip(tr("System command"));
+    connect(systemCommandAction, SIGNAL(triggered()), this, SLOT(systemCommand()));
 
     closeAction = new QAction(tr("&Close"), this);
     closeAction->setShortcut(tr("Ctrl+W"));
@@ -370,7 +370,7 @@ void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu( tr("&File") );
     fileMenu->addAction( openAction );
-    fileMenu->addAction( connectAction );
+    fileMenu->addAction( systemCommandAction );
     fileMenu->addAction( closeAction );
     fileMenu->addAction( closeAllAction );
     fileMenu->addSeparator();
@@ -419,8 +419,8 @@ void MainWindow::createMenus()
 void MainWindow::createToolBars()
 {
     infoLine = new InfoLine();
-    infoLine->setFrameStyle( QFrame::WinPanel | QFrame::Sunken );
-    infoLine->setLineWidth( 0 );
+    infoLine->setFrameStyle( QFrame::Panel | QFrame::Sunken );
+    infoLine->setLineWidth( 1 );
 
     lineNbField = new QLabel( );
     lineNbField->setText( "Line 0" );
@@ -461,12 +461,18 @@ void MainWindow::open()
         loadFile(fileName);
 }
 
-void MainWindow::connectRemote()
+void MainWindow::systemCommand()
 {
-    SysCommandDialog sc;
+    SysCommandDialog sc(*this);
+
+    connect(&sc, SIGNAL( loadFile( const QString& ) ),
+            this, SLOT( loadFileNonInteractive( const QString& ) ) );
 
     sc.exec();
     sc.show();
+
+    disconnect(&sc, SIGNAL( loadFile( const QString& ) ),
+               this, SLOT( loadFileNonInteractive( const QString& ) ) );
 
 }
 

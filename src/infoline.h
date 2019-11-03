@@ -21,11 +21,12 @@
 #define INFOLINE_H
 
 #include <QLabel>
+#include <QTextEdit>
 #include <QPalette>
 
 // Information line with integrated completion gauge
 // used for the file name and the search results.
-class InfoLine : public QLabel
+class InfoLine : public QTextEdit
 {
   public:
     // Default constructor
