@@ -21,9 +21,7 @@ combination of grep and less.
 * Is open source, released under the GPL
 
 ## Features of glopp (not officially relased, still on branch)
-* Python plugin support, that allowes:
-** custom search option egrep based, like context of found lines
-** removing of chosen columns
+* Python plugin support, that allowes: custom search option egrep based, like context of found lines, removing of chosen columns, redirecting search results to new tab and work on it like regular file, do another search, etc
 * Marking lines in selection
 * Filters selecting only on matching pattern
 * Option of copying file from toolbar
