@@ -1,40 +1,63 @@
-language: cpp
-
-matrix:
-  include:
-    - os: linux
-      compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - sourceline: ppa:beineri/opt-qt591-trusty
-          packages:
-            - gcc-6
-            - g++-6
-            - qt59base
-            - qt59tools
-            - qt59svg
-            - libboost-program-options-dev
-    - os: osx
-      compiler: clang
-
-
-
-before_install:
- - '[ "$TRAVIS_OS_NAME" != osx   ] || brew update'
-
-install:
- - '[ "$TRAVIS_OS_NAME" != osx ] || brew install qt'
- - '[ "$TRAVIS_OS_NAME" != osx ] || brew link --force qt'
-
-before_script:
- - '[[ "$TRAVIS_OS_NAME" != linux || "$CXX" != g++     ]] || export QMAKESPEC=linux-g++'
- - '[[ "$TRAVIS_OS_NAME" != osx   || "$CXX" != clang++ ]] || export QMAKESPEC=macx-clang'
- - '[ "$TRAVIS_OS_NAME" != linux ] || source /opt/qt59/bin/qt59-env.sh'
- - qmake -v
-
-script:
- - '[ "$TRAVIS_OS_NAME" != linux ] || qmake QMAKE_CXX=g++-6 glogg.pro'
- - '[ "$TRAVIS_OS_NAME" != osx ] || qmake glogg.pro'
- - make
+{
+  "language": "cpp",
+  "os": [
+    "linux"
+  ],
+  "dist": "bionic",
+  "before_install": [
+    "[ \"$TRAVIS_OS_NAME\" != osx   ] || brew update"
+  ],
+  "install": [
+    "[ \"$TRAVIS_OS_NAME\" != osx ] || brew install qt",
+    "[ \"$TRAVIS_OS_NAME\" != osx ] || brew link --force qt"
+  ],
+  "before_script": [
+    "[[ \"$TRAVIS_OS_NAME\" != linux || \"$CXX\" != g++     ]] || export QMAKESPEC=linux-g++",
+    "[[ \"$TRAVIS_OS_NAME\" != osx   || \"$CXX\" != clang++ ]] || export QMAKESPEC=macx-clang",
+    "[ \"$TRAVIS_OS_NAME\" != linux ] || source /opt/qt514/bin/qt514-env.sh",
+    "qmake -v"
+  ],
+  "script": [
+    "[ \"$TRAVIS_OS_NAME\" != linux ] || qmake QMAKE_CXX=g++-6 glogg.pro",
+    "[ \"$TRAVIS_OS_NAME\" != osx ] || qmake glogg.pro",
+    "make"
+  ],
+  "jobs": {
+    "include": [
+      {
+        "os": "linux",
+        "compiler": "gcc",
+        "addons": {
+          "apt": {
+            "sources": [
+              {
+                "name": "ubuntu-toolchain-r-test"
+              },
+              {
+                "sourceline": "ppa:beineri/opt-qt-5.14.0-bionic"
+              }
+            ],
+            "packages": [
+              "gcc-6",
+              "g++-6",
+              "libglew-dev",
+              "qt514base",
+              "qt514tools",
+              "qt514svg",
+              "libboost-program-options-dev",
+              "libboost-dev",
+              "libboost-all-dev",
+              "libboost-python-dev",
+              "python3-dev",
+              "python3-pyqt5"
+            ]
+          }
+        }
+      },
+      {
+        "os": "osx",
+        "compiler": "clang"
+      }
+    ]
+  }
+}
