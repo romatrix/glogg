@@ -80,7 +80,6 @@ SOURCES += \
     src/plugin/Handler.cpp \
     src/plugin/PluginsDialog.cpp \
     src/plugin/pluginset.cpp \
-    src/plugin/SyncPipe.cpp \
     src/QActionExtended.cpp
 
 INCLUDEPATH += src/
@@ -148,7 +147,6 @@ HEADERS += \
     src/data/search_result.h \
     src/plugin/PluginsDialog.h \
     src/plugin/pluginset.h \
-    src/plugin/SyncPipe.h \
     src/plugin/PythonPluginInterface.h \
     src/QActionExtended.h
 
