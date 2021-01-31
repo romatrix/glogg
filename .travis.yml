@@ -40,7 +40,7 @@
             "packages": [
               "gcc-6",
               "g++-6",
-              "libglew-dev"
+              "libglew-dev",
               "qt514base",
               "qt514tools",
               "qt514svg",
