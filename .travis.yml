@@ -14,7 +14,7 @@
   "before_script": [
     "[[ \"$TRAVIS_OS_NAME\" != linux || \"$CXX\" != g++     ]] || export QMAKESPEC=linux-g++",
     "[[ \"$TRAVIS_OS_NAME\" != osx   || \"$CXX\" != clang++ ]] || export QMAKESPEC=macx-clang",
-    "[ \"$TRAVIS_OS_NAME\" != linux ] || source /opt/qt59/bin/qt59-env.sh",
+    "[ \"$TRAVIS_OS_NAME\" != linux ] || source /opt/qt514/bin/qt514-env.sh",
     "qmake -v"
   ],
   "script": [
@@ -34,7 +34,7 @@
                 "name": "ubuntu-toolchain-r-test"
               },
               {
-                "sourceline": "ppa:beineri/opt-qt591-trusty"
+                "sourceline": "ppa:beineri/opt-qt-5.14.0-bionic"
               }
             ],
             "packages": [
