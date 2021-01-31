@@ -1,4 +1,4 @@
-[![Linux and Mac Build Status](https://travis-ci.com/romatrix/glopp.svg?branch=master)](https://travis-ci.com/romatrix/glopp)
+[![Linux and Mac Build Status](https://travis-ci.com/romatrix/glopp.svg?branch=plugin_support)](https://travis-ci.com/romatrix/glopp)
 
 glogg - the fast, smart log explorer
 =====================================
