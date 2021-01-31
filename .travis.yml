@@ -40,9 +40,9 @@
             "packages": [
               "gcc-6",
               "g++-6",
-              "qt59base",
-              "qt59tools",
-              "qt59svg",
+              "qt514base",
+              "qt514tools",
+              "qt514svg",
               "libboost-program-options-dev"
             ]
           }
