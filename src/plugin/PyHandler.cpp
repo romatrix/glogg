@@ -173,6 +173,8 @@ bool PyHandler::isOnSearcAvailable()
 
 void PyHandler::onShowUI()
 {
+    cout << __FUNCTION__ << ":" <<this << "\n";
+
     std::unique_lock<std::mutex>(pyContextLock);
 
     try{
@@ -189,6 +191,8 @@ void PyHandler::onShowUI()
 
 void PyHandler::onHideUI()
 {
+    cout << __FUNCTION__ << ":" <<this << "\n";
+
     std::unique_lock<std::mutex>(pyContextLock);
 
     try{

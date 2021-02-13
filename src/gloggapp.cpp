@@ -20,6 +20,8 @@
 #include "gloggapp.h"
 
 #include <QFileOpenEvent>
+#include <iostream>
+#include <QDialog>
 
 #ifdef __APPLE__
 bool GloggApp::event( QEvent *event )
@@ -32,3 +34,14 @@ bool GloggApp::event( QEvent *event )
     return QApplication::event(event);
 }
 #endif
+
+bool GloggApp::notify(QObject *o, QEvent *e)
+{
+    if(o->inherits("QDialog") and e->type() == QEvent::Type::Hide){
+        //cout << "show: " <<  << "\n";
+        QDialog* dlg = ((QDialog*)o);
+        //dlg->setWindowTitle("Tada");
+        mw_->onHideDialog(dlg->windowTitle().toStdString());
+    }
+    return QApplication::notify(o, e);
+}

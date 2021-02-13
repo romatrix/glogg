@@ -22,6 +22,7 @@
 
 #include "PythonPlugin.h"
 #include <QApplication>
+#include "mainwindow.h"
 
 // Subclass QApplication to add a custom event handler
 class GloggApp : public QApplication
@@ -30,6 +31,8 @@ class GloggApp : public QApplication
   public:
     GloggApp( int &argc, char **argv ) : QApplication( argc, argv )
     {}
+    bool notify(QObject *, QEvent *) override;
+    void set(MainWindow* mw) { mw_ = mw;}
 
   signals:
     void loadFile( const QString& file_name );
@@ -38,6 +41,7 @@ class GloggApp : public QApplication
 #ifdef __APPLE__
     virtual bool event( QEvent* event );
 #endif
+    MainWindow *mw_ = nullptr;
 };
 
 #endif

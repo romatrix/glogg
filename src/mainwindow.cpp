@@ -37,6 +37,8 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <QUrl>
+#include <QWindowList>
+#include <QWindow>
 
 #include "log.h"
 
@@ -459,7 +461,7 @@ void MainWindow::createToolBars()
 
     toolBar->addSeparator();
 
-    pythonPlugin_->onCreateToolBars([this](string tooltip, string icon, string pluginName, function<void(string, const string &fileName)> action)
+    pythonPlugin_->onCreateToolBars([this](string tooltip, string icon, string pluginName, function<void(string, bool)> action)
     {
         addPluginAction(tooltip, icon, pluginName, action);
     });
@@ -468,7 +470,7 @@ void MainWindow::createToolBars()
 
 }
 
-void MainWindow::addPluginAction(string tooltip, string icon, string pluginName, function<void(string, const string &fileName)> action)
+void MainWindow::addPluginAction(string tooltip, string icon, string pluginName, function<void(string, bool)> action)
 {
     if(pluginActions_[pluginName]){
         return;
@@ -478,7 +480,8 @@ void MainWindow::addPluginAction(string tooltip, string icon, string pluginName,
     pluginAction->setShortcut(QKeySequence::Open);
     pluginAction->setIcon( QIcon( ":/images/open14.png" ) );
     pluginAction->setStatusTip(tr(tooltip.c_str()));
-    connect(pluginAction, SIGNAL(triggered()), pluginAction, SLOT(showPluginUI()));
+    pluginAction->setCheckable(true);
+    connect(pluginAction, SIGNAL(triggered(bool)), pluginAction, SLOT(showPluginUI(bool)));
     toolBar->addAction(pluginAction);
     pluginActions_[pluginName] = pluginAction;
 }
@@ -576,10 +579,28 @@ void MainWindow::filters()
 // Opens the 'Plugins' dialog box
 void MainWindow::plugins()
 {
+//    QWindowList wl = qApp->allWindows();
+
+//    for(int i = 0; i < wl.size(); i++){
+//        cout << wl[i]->title().toStdString() << wl[i]->isVisible() << "\n";
+//        wl[i]->isVisible();
+//        //wl[i]->is
+//    }
+
     PluginsDialog dialog(pythonPlugin_, this);
     connect(&dialog, &PluginsDialog::pluginsOptionsChanged ,
                        this, &MainWindow::applyPluginConfiguration );
     dialog.exec();
+
+}
+
+void MainWindow::onHideDialog(const string& dialogTitle)
+{
+    cout << __FUNCTION__ << ": " << dialogTitle << "\n";
+    if(pluginActions_.find(dialogTitle) != pluginActions_.end()){
+        pluginActions_[dialogTitle]->setChecked(false);
+        //pluginActions_[dialogTitle]->hide();
+    }
 }
 
 void MainWindow::showPluginUI()

@@ -273,6 +273,19 @@ void PythonPlugin::PythonPluginImpl::onShowUI(string pluginName, const string &f
     mHandlers[pair<string, string>{pluginName, fileName}]->onShowUI();
 }
 
+void PythonPlugin::PythonPluginImpl::onHideAllUI(const string &pluginName)
+{
+    PyGIL gil;
+
+    cout << __FUNCTION__ << "\n";
+
+    for(auto &o: mHandlers){
+        if(o.first.first == pluginName){
+            o.second->onHideUI();
+        }
+    }
+}
+
 void PythonPlugin::PythonPluginImpl::updateAppViews(const string &fileName)
 {
     mUpdateViewsFun[fileName]();
@@ -281,14 +294,21 @@ void PythonPlugin::PythonPluginImpl::updateAppViews(const string &fileName)
 
 void PythonPlugin::PythonPluginImpl::onCreateToolBarItem(string pluginName, const string &fileName)
 {
-    mCreateAction("", "", pluginName, [this](string option, const string &fileName)
+    mCreateAction("", "", pluginName, [this](string option, bool checked)
     {
-        cout << "dupa\n";
-        onShowUI(option, mCurrentFileName);
+        //cout << "dupa\n";
+        //onShowUI(option, mCurrentFileName);
+        mShowGui[option] = checked;
+
+        if(checked){
+            onShowUI(option, mCurrentFileName);
+        } else {
+            onHideAllUI(option);
+        }
     });
 }
 
-void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, string, string, function<void (string, const string&)>)> createAction)
+void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, string, string, function<void (string, bool)>)> createAction)
 {
     PyGIL gil;
 
@@ -300,10 +320,16 @@ void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, str
         for(auto& t: mDerivedClassContainer){
             if(mInitialConfig[t.name]){
 
-                mCreateAction("", "", t.name, [this](string option, const string &fileName)
+                mCreateAction("", "", t.name, [this](string option, bool checked)
                 {
-                    cout << "dupa\n";
-                    onShowUI(option, mCurrentFileName);
+                    PyGIL gil;
+                    mShowGui[option] = checked;
+
+                    if(checked){
+                        onShowUI(option, mCurrentFileName);
+                    } else {
+                        onHideAllUI(option);
+                    }
                 });
             }
         }
@@ -436,7 +462,7 @@ PythonPlugin::PythonPluginImpl::DerivedType::~DerivedType()
 }
 
 
-void PythonPlugin::onCreateToolBars(function<void (string, string, string, function<void (string, const string &)>)> createAction)
+void PythonPlugin::onCreateToolBars(function<void (string, string, string, function<void (string, bool)>)> createAction)
 {
     if(not mPluginImpl){
         return;
@@ -472,10 +498,8 @@ void PythonPlugin::PythonPluginImpl::onShowLogView(const string &fileName)
     PyGIL gil;
 
     for(auto &o: mHandlers){
-        if(o.first.second == fileName) {
+        if(o.first.second == fileName && mShowGui[o.first.first]) {
             o.second->onShowUI();
-        //if(o.second->doGetExpandedLines(line)){
-        //}
         } else {
             o.second->onHideUI();
         }

@@ -29,7 +29,7 @@ public:
     virtual bool isEnabled() = 0;
     virtual void enable(bool set) = 0;
     virtual void updateAppViews(const string& fileName) = 0;
-    virtual void onCreateToolBars(function<void(string tooltip, string icon, string pluginName, function<void(string, const string&)> action)> createAction) = 0;
+    virtual void onCreateToolBars(function<void(string tooltip, string icon, string pluginName, function<void(string, bool)> action)> createAction) = 0;
     virtual void onCreateToolBarItem(string pluginName, const string &fileName) = 0;
     virtual void onShowLogView(const string& fileName) = 0;
 };

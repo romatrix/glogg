@@ -67,7 +67,8 @@ class MainWindow : public QMainWindow
     // version checking etc...
     void startBackgroundTasks();
 
-    void addPluginAction(string tooltip, string icon, string pluginName, function<void(string, const string &)> action);
+    void addPluginAction(string tooltip, string icon, string pluginName, function<void(string, bool)> action);
+    void onHideDialog(const string &dialogTitle);
 protected:
     void closeEvent( QCloseEvent* event );
     // Drag and drop support

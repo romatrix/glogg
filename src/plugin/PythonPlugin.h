@@ -92,10 +92,12 @@ private:
         PyThreadState *threadState = nullptr;
         map<string, bool> mInitialConfig;
         std::map<const string, function<void ()>> mUpdateViewsFun;
-        function<void (string, string, string, function<void (string, const string&)>)> mCreateAction;
+        function<void (string, string, string, function<void (string, bool)>)> mCreateAction;
         string mCurrentFileName;
+        map<string, bool> mShowGui;
 
         void onShowUI(string pluginName, const string &fileName);
+        void onHideAllUI(const string &pluginName);
 
         // PythonPluginInterface interfaces
     public:
@@ -114,7 +116,7 @@ private:
 
         // PythonPluginInterface interface
     public:
-        void onCreateToolBars(function<void (string, string, string, function<void (string, const string&)>)> createAction) override;
+        void onCreateToolBars(function<void(string, string, string, function<void (string, bool)>)> createAction) override;
         void onCreateToolBarItem(string pluginName, const string &fileName);
         void onShowLogView(const string &fileName) override;
     };
@@ -125,7 +127,7 @@ private:
 
     // PythonPluginInterface interface
 public:
-    void onCreateToolBars(function<void (string, string, string, function<void (string, const string&)>)> createAction) override;
+    void onCreateToolBars(function<void (string, string, string, function<void (string, bool)>)> createAction) override;
     void onCreateToolBarItem(string pluginName, const string &fileName);
     void onShowLogView(const string &fileName) override;
     //void doGetExpandedLines(string &line, const string &fileName) override;

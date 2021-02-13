@@ -39,6 +39,9 @@ class MyForm(QtWidgets.QDialog):
     def getColumns(self):
         return self.ui.lineEditColumns.text()
 
+    def closeEvent(self, data):
+        print("close event")
+
 
 
 #app = QtGui.QApplication()

@@ -263,6 +263,7 @@ int main(int argc, char *argv[])
     std::unique_ptr<Session> session( new Session(pythonPlugin) );
     MainWindow mw(pythonPlugin, std::move( session ), externalCommunicator );
 
+    app.set(&mw);
     // Geometry
     mw.reloadGeometry();
 
