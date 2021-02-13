@@ -281,11 +281,10 @@ void PythonPlugin::PythonPluginImpl::updateAppViews(const string &fileName)
 
 void PythonPlugin::PythonPluginImpl::onCreateToolBarItem(string pluginName, const string &fileName)
 {
-    //mHandlers[pluginName]
     mCreateAction("", "", pluginName, [this](string option, const string &fileName)
     {
         cout << "dupa\n";
-        onShowUI(option, fileName);
+        onShowUI(option, mCurrentfileName);
     });
 }
 
@@ -295,14 +294,23 @@ void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, str
 
     mCreateAction = createAction;
 
-    for(auto &o: mHandlers){
-        //o.second->
+    cout << "\nCreating plugins toolbar instances:\n";
 
-        mCreateAction("", "", o.first.first, [this](string option, const string &fileName)
-        {
-            cout << "dupa\n";
-            onShowUI(option, fileName);
-        });
+    try {
+        for(auto& t: mDerivedClassContainer){
+            if(mInitialConfig[t.name]){
+
+                mCreateAction("", "", t.name, [this](string option, const string &fileName)
+                {
+                    cout << "dupa\n";
+                    onShowUI(option, mCurrentfileName);
+                });
+            }
+        }
+
+    } catch (error_already_set& e) {
+        PyErr_PrintEx(0);
+        throw std::logic_error("\n!Error while loading toolbars handler\n\n");
     }
 }
 
@@ -325,7 +333,6 @@ void PythonPlugin::PythonPluginImpl::createInstances(const string &fileName)
         PyErr_PrintEx(0);
         throw std::logic_error("\n!Error while loading template handler: [" + typeName + "]\n\n");
     }
-
 }
 
 void PythonPlugin::PythonPluginImpl::onPopupMenu(AbstractLogView *alv)
@@ -446,6 +453,8 @@ void PythonPlugin::onShowLogView(const string &fileName)
 
 void PythonPlugin::PythonPluginImpl::onShowLogView(const string &fileName)
 {
+    mCurrentfileName = fileName;
+
     cout << __FUNCTION__ << ": "<< fileName << "\n";
     PyGIL gil;
 

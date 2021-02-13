@@ -93,6 +93,7 @@ private:
         map<string, bool> mInitialConfig;
         std::map<const string, function<void ()>> mUpdateViewsFun;
         function<void (string, string, string, function<void (string, const string&)>)> mCreateAction;
+        string mCurrentfileName;
 
         void onShowUI(string pluginName, const string &fileName);
 
