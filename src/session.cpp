@@ -166,6 +166,14 @@ void Session::getFileInfo( const ViewInterface* view, uint64_t* fileSize,
     *lastModified = file->logData->getLastModifiedDate();
 }
 
+std::vector<std::string> Session::getOpenFiles()
+{
+    std::vector<std::string> ret;
+    std::transform(openFiles_.begin(), openFiles_.end(), std::back_inserter(ret), [this](auto &i){return i.second.fileName;});
+
+    return ret;
+}
+
 
 /*
  * Private methods

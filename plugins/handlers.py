@@ -33,7 +33,7 @@ class UI(PyHandler):
         PyHandler.__init__(self, obj)
         print("UI")
         self.myapp = PyDialog.MyForm(self)
-        self.myapp.show()
+        #self.myapp.show()
 
     # def on_popup_menu(self):
     #     print("on_popup_menu UI")
@@ -73,13 +73,15 @@ class UI(PyHandler):
         remove_col_list = self.myapp.getColumns().split()
         remove_col_list_all = [int(x) for x in remove_col_list if x.lstrip('-').isdigit() != 0]
 
-        remove_col_list = [x for x in remove_col_list_all if x > 0]
+        remove_col_list = [x for x in remove_col_list_all if x >= 0]
         remove_col_list += [len(columns) + x for x in remove_col_list_all if x < 0]
 
         ret = []
-        for col in range(1, len(columns)):
+        for col in range(0, len(columns)):
             if not col in remove_col_list:
                 ret.append(columns[col])
+            else:
+                print("removed: ", col)
 
         return " ".join(ret)
 

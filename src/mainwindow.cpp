@@ -631,16 +631,18 @@ void MainWindow::encodingChanged( QAction* action )
 
 void MainWindow::applyPluginConfiguration(string pluginName, bool state)
 {
-    vector<string> files;
+    //vector<string> files;
     cout << __FUNCTION__ << "\n";
 
-    for(const auto &v: files){
-        if(not state){
-            toolBar->removeAction(pluginActions_[pluginName]);
-            pluginActions_[pluginName] = nullptr;
-        } else {
-            pythonPlugin_->onCreateToolBarItem(pluginName, v); //TODO: add list of open files
-        }
+    for(const auto& f: session_->getOpenFiles()){
+        pythonPlugin_->setPluginState(pluginName, state, f);
+    }
+
+    if(not state){
+        toolBar->removeAction(pluginActions_[pluginName]);
+        pluginActions_[pluginName] = nullptr;
+    } else {
+        pythonPlugin_->onCreateToolBarItem(pluginName, "");
     }
 }
 

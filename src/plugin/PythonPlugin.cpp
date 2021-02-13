@@ -284,7 +284,7 @@ void PythonPlugin::PythonPluginImpl::onCreateToolBarItem(string pluginName, cons
     mCreateAction("", "", pluginName, [this](string option, const string &fileName)
     {
         cout << "dupa\n";
-        onShowUI(option, mCurrentfileName);
+        onShowUI(option, mCurrentFileName);
     });
 }
 
@@ -303,7 +303,7 @@ void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, str
                 mCreateAction("", "", t.name, [this](string option, const string &fileName)
                 {
                     cout << "dupa\n";
-                    onShowUI(option, mCurrentfileName);
+                    onShowUI(option, mCurrentFileName);
                 });
             }
         }
@@ -399,7 +399,12 @@ map<string, bool> PythonPlugin::PythonPluginImpl::getConfig() const
     map<string, bool> config;
 
     for(auto& t: mDerivedClassContainer){
-        config[t.name] = mHandlers.find(pair<string, string>{t.name, ""}) != mHandlers.end();
+        config[t.name] = find_if(mHandlers.begin(), mHandlers.end(),
+                                 [this,t](const pair< pair<string, string>, shared_ptr<PyHandler>>& item)
+                                 {
+                                     return t.name == item.first.first;
+                                 }
+                                 ) != mHandlers.end();
     }
 
     return config;
@@ -411,8 +416,16 @@ void PythonPlugin::PythonPluginImpl::setPluginState(const string &typeName, bool
 
     if(not state){
         //mHandlers[typeName]->onRelease();
-        mHandlers.erase({typeName, fileName});
-        updateAppViews(fileName);
+        //mHandlers.erase({typeName, fileName});
+        //for(auto)
+        for (auto it = mHandlers.begin(); it != mHandlers.end(); ) {
+            if (it->first.first == typeName)
+                it = mHandlers.erase(it);
+            else
+                ++it;
+        }
+
+        updateAppViews(mCurrentFileName);
     }else{
         createInstance({}, typeName, fileName);
     }
@@ -453,7 +466,7 @@ void PythonPlugin::onShowLogView(const string &fileName)
 
 void PythonPlugin::PythonPluginImpl::onShowLogView(const string &fileName)
 {
-    mCurrentfileName = fileName;
+    mCurrentFileName = fileName;
 
     cout << __FUNCTION__ << ": "<< fileName << "\n";
     PyGIL gil;

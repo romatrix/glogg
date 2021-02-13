@@ -99,6 +99,8 @@ class Session {
     std::shared_ptr<QuickFindPattern> getQuickFindPattern() const
     { return quickFindPattern_; }
 
+    std::vector<std::string> getOpenFiles();
+
   private:
     struct OpenFile {
         std::string fileName;
