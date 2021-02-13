@@ -24,6 +24,10 @@ public:
     virtual ~PyHandler();
 
     void setPyhonObject(const boost::python::object& obj);
+    void setId(const string &id)
+    {
+        mId = id;
+    }
     void setPythonPlugin(PythonPluginInterface* pp) {mPythonPlugin = pp;}
     bool setPyHandlerCallCount(string handler, int count);
 
@@ -38,7 +42,10 @@ public:
     const char* on_release = "on_release";
     const char* on_search = "on_search";
     const char* on_show_ui = "on_show_ui";
+    const char* on_hide_ui = "on_hide_ui";
     const char* on_display_line = "on_display_line";
+
+    string mId;
 
     map<string, int> mPyHandlers = {{on_trigger, -1}};
     PythonPluginInterface *mPythonPlugin = nullptr;
@@ -60,6 +67,7 @@ public:
     bool doGetExpandedLines(string &line);
     void updateAppViews();
     void onShowUI();
+    void onHideUI();
 };
 
 

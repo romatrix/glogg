@@ -386,7 +386,7 @@ QStringList LogFilteredData::doGetExpandedLines( qint64 first_line, int number )
     for ( int i = first_line; i < first_line + number; i++ ) {
         QString line = doGetExpandedLineString( i );
         std::string stdlLine = line.toStdString();
-        pythonPlugin_->doGetExpandedLines(stdlLine);
+        pythonPlugin_->doGetExpandedLines(stdlLine, sourceLogData_->getFileName().toStdString());
         line = QString::fromStdString(stdlLine);
         list.append( line );
     }

@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
     GetPersistentInfo().retrieve( QString( "settings" ) );
 
     PythonPlugin *pythonPlugin = new PythonPlugin;
-    pythonPlugin->createInstances();
+    //pythonPlugin->createInstances("");
     std::unique_ptr<Session> session( new Session(pythonPlugin) );
     MainWindow mw(pythonPlugin, std::move( session ), externalCommunicator );
 

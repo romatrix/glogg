@@ -697,12 +697,12 @@ void AbstractLogView::scrollContentsBy( int dx, int dy )
 
 void AbstractLogView::paintEvent( QPaintEvent* paintEvent )
 {
-    cout << __FUNCTION__ << "\n";
+    //cout << __FUNCTION__ << "\n";
     const QRect invalidRect = paintEvent->rect();
     if ( (invalidRect.isEmpty()) || (logData == NULL) )
         return;
 
-    cout << __FUNCTION__ << "2\n";
+    //cout << __FUNCTION__ << "2\n";
     LOG(logDEBUG4) << "paintEvent received, firstLine=" << firstLine
         << " lastLineAligned=" << lastLineAligned
         << " rect: " << invalidRect.topLeft().x() <<
@@ -761,7 +761,7 @@ void AbstractLogView::paintEvent( QPaintEvent* paintEvent )
         pullToFollowCache_.nb_columns_ = getNbVisibleCols();
     }
 
-    cout << __FUNCTION__ << "3\n";
+    //cout << __FUNCTION__ << "3\n";
 
     QPainter devicePainter( viewport() );
     int drawingTopPosition = - pullToFollowHeight;

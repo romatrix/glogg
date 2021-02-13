@@ -187,6 +187,22 @@ void PyHandler::onShowUI()
     }
 }
 
+void PyHandler::onHideUI()
+{
+    std::unique_lock<std::mutex>(pyContextLock);
+
+    try{
+        if(PyObject_HasAttrString(mObj->ptr(), on_hide_ui)){
+            mObj->attr(on_hide_ui)();
+        }
+    } catch (error_already_set& e) {
+        PyErr_PrintEx(0);
+        throw std::logic_error(string("\n[") +
+                               __FUNCTION__ +
+                               string("] !Error during executing Python code\n"));
+    }
+}
+
 SearchResultArray PyHandler::onSearch(const string& fileName, const string& pattern, int initialLine)
 {
     std::unique_lock<std::mutex>(pyContextLock);
@@ -247,6 +263,6 @@ bool PyHandler::doGetExpandedLines(string& line)
 
 void PyHandler::updateAppViews()
 {
-    mPythonPlugin->updateAppViews();
+    mPythonPlugin->updateAppViews(mId);
 }
 

@@ -58,6 +58,7 @@ class CrawlerWidget : public QSplitter,
 
   public:
     CrawlerWidget(PythonPluginInterface *pp,  QWidget *parent=0 );
+    void registerPluginUpdateView(const string& fileName);
 
     // Get the line number of the first line displayed.
     int getTopLine() const;
@@ -307,6 +308,7 @@ class CrawlerWidget : public QSplitter,
     QString         encoding_text_;
 
     PythonPluginInterface* pythonPlugin_ = nullptr;
+    string fileName_;
 };
 
 #endif

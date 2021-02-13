@@ -193,13 +193,14 @@ void MainWindow::reloadSession()
 {
     int current_file_index = -1;
 
-    for ( auto open_file: session_->restore(
+    for (std::pair<std::string, ViewInterface*> open_file: session_->restore(
                [this]() { return new CrawlerWidget(pythonPlugin_); },
                &current_file_index ) )
     {
         QString file_name = { open_file.first.c_str() };
         CrawlerWidget* crawler_widget = dynamic_cast<CrawlerWidget*>(
-                open_file.second );
+                open_file.first, open_file.second );
+        crawler_widget->registerPluginUpdateView(file_name.toStdString());
 
         assert( crawler_widget );
 
@@ -458,7 +459,7 @@ void MainWindow::createToolBars()
 
     toolBar->addSeparator();
 
-    pythonPlugin_->onCreateToolBars([this](string tooltip, string icon, string pluginName, function<void(string)> action)
+    pythonPlugin_->onCreateToolBars([this](string tooltip, string icon, string pluginName, function<void(string, const string &fileName)> action)
     {
         addPluginAction(tooltip, icon, pluginName, action);
     });
@@ -467,7 +468,7 @@ void MainWindow::createToolBars()
 
 }
 
-void MainWindow::addPluginAction(string tooltip, string icon, string pluginName, function<void(string)> action)
+void MainWindow::addPluginAction(string tooltip, string icon, string pluginName, function<void(string, const string &fileName)> action)
 {
     if(pluginActions_[pluginName]){
         return;
@@ -630,13 +631,16 @@ void MainWindow::encodingChanged( QAction* action )
 
 void MainWindow::applyPluginConfiguration(string pluginName, bool state)
 {
+    vector<string> files;
     cout << __FUNCTION__ << "\n";
 
-    if(not state){
-        toolBar->removeAction(pluginActions_[pluginName]);
-        pluginActions_[pluginName] = nullptr;
-    } else {
-        pythonPlugin_->onCreateToolBarItem(pluginName);
+    for(const auto &v: files){
+        if(not state){
+            toolBar->removeAction(pluginActions_[pluginName]);
+            pluginActions_[pluginName] = nullptr;
+        } else {
+            pythonPlugin_->onCreateToolBarItem(pluginName, v); //TODO: add list of open files
+        }
     }
 }
 
@@ -776,6 +780,7 @@ void MainWindow::currentTabChanged( int index )
         // Update the title bar
         updateTitleBar( QString(
                     session_->getFilename( crawler_widget ).c_str() ) );
+        pythonPlugin_->onShowLogView(session_->getFilename( crawler_widget ).c_str());
     }
     else
     {
@@ -921,6 +926,7 @@ bool MainWindow::loadFile( const QString& fileName )
                 session_->open( fileName.toStdString(),
                     [this]() { return new CrawlerWidget(pythonPlugin_); } ) );
         assert( crawler_widget );
+        crawler_widget->registerPluginUpdateView(fileName.toStdString());
 
         // We won't show the widget until the file is fully loaded
         crawler_widget->hide();

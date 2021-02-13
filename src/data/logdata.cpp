@@ -119,6 +119,7 @@ void LogData::attachFile( const QString& fileName )
 
     attached_file_.reset( new QFile( fileName ) );
     attached_file_->open( QIODevice::ReadOnly );
+    pythonPlugin_->createInstances(attached_file_->fileName().toStdString());
 
     std::shared_ptr<const LogDataOperation> operation( new AttachOperation( fileName ) );
     enqueueOperation( std::move( operation ) );
@@ -404,7 +405,7 @@ QString LogData::doGetLineString( qint64 line ) const
     QString string = codec_->toUnicode( attached_file_->read( end_byte - first_byte ) );
 
     std::string stdlLine = string.toStdString();
-    pythonPlugin_->doGetExpandedLines(stdlLine);
+    pythonPlugin_->doGetExpandedLines(stdlLine, getFileName().toStdString());
     string = QString::fromStdString(stdlLine);
 
     fileMutex_.unlock();
@@ -532,7 +533,7 @@ QStringList LogData::doGetExpandedLines( qint64 first_line, int number ) const
         QString l = untabify( conv_line );
 
         std::string stdlLine = l.toStdString();
-        pythonPlugin_->doGetExpandedLines(stdlLine);
+        pythonPlugin_->doGetExpandedLines(stdlLine, getFileName().toStdString());
         l = QString::fromStdString(stdlLine);
 
         list.append( l );

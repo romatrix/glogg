@@ -37,19 +37,19 @@ class PythonPlugin: public PythonPluginInterface
 {
 public:
     PythonPlugin();
-    void createInstances();
+    void createInstances(const string &fileName);
     void onPopupMenu(AbstractLogView* alv);
     void onCreateMenu(AbstractLogView *alv);
     bool isOnSearcAvailable();
     SearchResultArray doSearch(const string &fileName, const string &pattern, int initialLine);
-    void doGetExpandedLines(string &line);
+    void doGetExpandedLines(string &line, const string &fileName);
 
     map<string, bool> getConfig() const;
-    void setPluginState(const string& typeName, bool state);
+    void setPluginState(const string& typeName, bool state, const string &fileName);
     void enable(bool set);
     bool isEnabled() override;
-    void registerUpdateViewsFunction(function<void ()> updateViewsFun) override;
-    void updateAppViews() override;
+    void registerUpdateViewsFunction(function<void ()> updateViewsFun, const string& fileName) override;
+    void updateAppViews(const string& fileName) override;
 
 private:
 
@@ -71,7 +71,7 @@ private:
         PythonPluginImpl() = default;
         PythonPluginImpl(const map<string, bool>& config);
         ~PythonPluginImpl();
-        void createInstance(boost::optional<boost::python::object> type, const string &typeName);
+        void createInstance(boost::optional<boost::python::object> type, const string &typeName, const string &fileName);
 
         struct DerivedType
         {
@@ -88,33 +88,34 @@ private:
             return shared_ptr<T>(obj, [](T* o){ o->del(); });
         }
         vector<DerivedType> mDerivedClassContainer;
-        map<string, shared_ptr<PyHandler>> mHandlers;
+        map<pair<string,string>, shared_ptr<PyHandler>> mHandlers;
         PyThreadState *threadState = nullptr;
         map<string, bool> mInitialConfig;
-        function<void ()> mUpdateViewsFun;
-        function<void (string, string, string, function<void (string)>)> mCreateAction;
+        std::map<const string, function<void ()>> mUpdateViewsFun;
+        function<void (string, string, string, function<void (string, const string&)>)> mCreateAction;
 
-        void onShowUI(string pluginName);
+        void onShowUI(string pluginName, const string &fileName);
 
         // PythonPluginInterface interfaces
     public:
-        void createInstances() override;
+        void createInstances(const string &fileName) override;
         void onPopupMenu(AbstractLogView *alv) override;
         void onCreateMenu(AbstractLogView *alv) override;
         bool isOnSearcAvailable() override;
         SearchResultArray doSearch(const string &fileName, const string &pattern, int initialLine) override;
-        void doGetExpandedLines(string &line) override;
+        void doGetExpandedLines(string &line, const string &fileName) override;
         map<string, bool> getConfig() const override;
-        void setPluginState(const string &typeName, bool state) override;
-        void registerUpdateViewsFunction(function<void ()> updateViewsFun) override;
+        void setPluginState(const string &typeName, bool state, const string &fileName) override;
+        void registerUpdateViewsFunction(function<void ()> updateViewsFun, const string &fileName) override;
         bool isEnabled() override;
         void enable(bool set) override;
-        void updateAppViews() override;
+        void updateAppViews(const string& fileName) override;
 
         // PythonPluginInterface interface
     public:
-        void onCreateToolBars(function<void (string, string, string, function<void (string)>)> createAction) override;
-        void onCreateToolBarItem(string pluginName);
+        void onCreateToolBars(function<void (string, string, string, function<void (string, const string&)>)> createAction) override;
+        void onCreateToolBarItem(string pluginName, const string &fileName);
+        void onShowLogView(const string &fileName) override;
     };
 
     unique_ptr<PythonPluginImpl> mPluginImpl;
@@ -123,12 +124,14 @@ private:
 
     // PythonPluginInterface interface
 public:
-    void onCreateToolBars(function<void (string, string, string, function<void (string)>)> createAction) override;
-    void onCreateToolBarItem(string pluginName);
+    void onCreateToolBars(function<void (string, string, string, function<void (string, const string&)>)> createAction) override;
+    void onCreateToolBarItem(string pluginName, const string &fileName);
+    void onShowLogView(const string &fileName) override;
+    //void doGetExpandedLines(string &line, const string &fileName) override;
+
+    // PythonPluginInterface interface
+public:
 };
-
-
-
 
 
 #endif // PYTHONPLUGIN_H

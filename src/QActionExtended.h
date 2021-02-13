@@ -12,7 +12,7 @@ class QActionExtended: public QAction
 
 public:
 
-    QActionExtended(string pluginName, function<void(string)> action, QObject *parent = nullptr):QAction(tr(""), parent),action_(action),pluginName_(pluginName)
+    QActionExtended(string pluginName, function<void(string, const string &fileName)> action, QObject *parent = nullptr):QAction(tr(""), parent),action_(action),pluginName_(pluginName)
     {
     }
     string getName()
@@ -23,10 +23,10 @@ private slots:
     void showPluginUI()
     {
         cout << __FUNCTION__ << "\n";
-        action_(pluginName_);
+        action_(pluginName_, "");
     }
 private:
-    function<void(string)> action_;
+    function<void(string, const string &fileName)> action_;
     string pluginName_;
 };
 

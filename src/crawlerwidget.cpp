@@ -44,6 +44,7 @@
 #include "quickfindwidget.h"
 #include "persistentinfo.h"
 #include "configuration.h"
+#include <iostream>
 
 // Palette for error signaling (yellow background)
 const QPalette CrawlerWidget::errorPalette( QColor( "yellow" ) );
@@ -102,6 +103,18 @@ CrawlerWidget::CrawlerWidget(PythonPluginInterface *pp, QWidget *parent )
     dataStatus_        = DataStatus::OLD_DATA;
 
     currentLineNumber_ = 0;
+}
+
+void CrawlerWidget::registerPluginUpdateView(const string &fileName)
+{
+    fileName_ = fileName;
+
+    pythonPlugin_->registerUpdateViewsFunction([this](){
+        std::cout << "registerUpdateViewsFunction: " << this << "\n";
+        filteredView->updateData();
+        logMainView->updateData();
+        logMainView->repaint();
+    }, fileName_);
 }
 
 // The top line is first one on the main display
@@ -729,13 +742,6 @@ void CrawlerWidget::setup()
             pythonPlugin_, logData_, quickFindPattern_.get(), &overview_, overviewWidget_ );
     filteredView    = new FilteredView(
             pythonPlugin_, logFilteredData_, quickFindPattern_.get() );
-
-    pythonPlugin_->registerUpdateViewsFunction([this](){
-        filteredView->updateData();
-        logMainView->updateData();
-        logMainView->repaint();
-    });
-
 
     overviewWidget_->setOverview( &overview_ );
     overviewWidget_->setParent( logMainView );

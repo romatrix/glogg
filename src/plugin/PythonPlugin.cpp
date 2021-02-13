@@ -26,13 +26,13 @@ PythonPlugin::PythonPlugin()
     enable(Persistent<PluginSet>( "pluginSet" )->isPluginSystemEnabled());
 }
 
-void PythonPlugin::createInstances()
+void PythonPlugin::createInstances(const string& fileName)
 {
     if(not mPluginImpl){
         return;
     }
 
-    mPluginImpl->createInstances();
+    mPluginImpl->createInstances(fileName);
 }
 
 void PythonPlugin::onPopupMenu(AbstractLogView *alv)
@@ -71,13 +71,13 @@ SearchResultArray PythonPlugin::doSearch(const string& fileName, const string& p
     return mPluginImpl->doSearch(fileName, pattern, initialLine);
 }
 
-void PythonPlugin::doGetExpandedLines(string& line)
+void PythonPlugin::doGetExpandedLines(string& line, const string &fileName)
 {
     if(not mPluginImpl){
         return;
     }
 
-    mPluginImpl->doGetExpandedLines(line);
+    mPluginImpl->doGetExpandedLines(line, fileName);
 }
 
 map<string, bool> PythonPlugin::getConfig() const
@@ -89,13 +89,13 @@ map<string, bool> PythonPlugin::getConfig() const
     return mPluginImpl->getConfig();
 }
 
-void PythonPlugin::setPluginState(const string &typeName, bool state)
+void PythonPlugin::setPluginState(const string &typeName, bool state, const string &fileName)
 {
     if(not mPluginImpl){
         return;
     }
 
-    mPluginImpl->setPluginState(typeName, state);
+    mPluginImpl->setPluginState(typeName, state, fileName);
 }
 
 void PythonPlugin::enable(bool set)
@@ -115,18 +115,22 @@ bool PythonPlugin::isEnabled()
     return mPluginImpl.operator bool();
 }
 
-void PythonPlugin::registerUpdateViewsFunction(function<void ()> updateViewsFun)
+void PythonPlugin::registerUpdateViewsFunction(function<void ()> updateViewsFun, const string &fileName)
 {
     if(not mPluginImpl){
         return;
     }
 
-    mPluginImpl->registerUpdateViewsFunction(updateViewsFun);
+    mPluginImpl->registerUpdateViewsFunction(updateViewsFun, fileName);
 }
 
-void PythonPlugin::updateAppViews()
+void PythonPlugin::updateAppViews(const string &fileName)
 {
-    mPluginImpl->updateAppViews();
+    if(not mPluginImpl){
+        return;
+    }
+
+    mPluginImpl->updateAppViews(fileName);
 }
 
 void PythonPlugin::PythonPluginImpl::enable(bool set)
@@ -139,9 +143,10 @@ bool PythonPlugin::PythonPluginImpl::isEnabled()
 }
 
 
-void PythonPlugin::PythonPluginImpl::registerUpdateViewsFunction(function<void ()> updateViewsFun)
+void PythonPlugin::PythonPluginImpl::registerUpdateViewsFunction(function<void ()> updateViewsFun, const string& fileName)
 {
-    mUpdateViewsFun = updateViewsFun;
+    cout << fileName << "\n";
+    mUpdateViewsFun[fileName] = updateViewsFun;
 }
 
 vector<string> getPythonPluginFilePaths(const string dir)
@@ -236,7 +241,7 @@ PythonPlugin::PythonPluginImpl::~PythonPluginImpl()
     //Py_Finalize();
 }
 
-void PythonPlugin::PythonPluginImpl::createInstance(boost::optional<boost::python::api::object> type, const string &typeName)
+void PythonPlugin::PythonPluginImpl::createInstance(boost::optional<boost::python::api::object> type, const string &typeName, const string &fileName)
 {
     PyGIL gil;
 
@@ -254,36 +259,37 @@ void PythonPlugin::PythonPluginImpl::createInstance(boost::optional<boost::pytho
     PyHandler* p = extract<PyHandler*>(obj.ptr());
     p->setPyhonObject(obj);
     p->setPythonPlugin(this);
+    p->setId(fileName);
 
-    mHandlers.emplace(typeName, create(p));
+    mHandlers.emplace(pair<string, string>{typeName, fileName}, create(p));
 
 }
 
-void PythonPlugin::PythonPluginImpl::onShowUI(string pluginName)
+void PythonPlugin::PythonPluginImpl::onShowUI(string pluginName, const string &fileName)
 {
     PyGIL gil;
 
     cout << __FUNCTION__ << ":" << pluginName << "\n";
-    mHandlers[pluginName]->onShowUI();
+    mHandlers[pair<string, string>{pluginName, fileName}]->onShowUI();
 }
 
-void PythonPlugin::PythonPluginImpl::updateAppViews()
+void PythonPlugin::PythonPluginImpl::updateAppViews(const string &fileName)
 {
-    mUpdateViewsFun();
+    mUpdateViewsFun[fileName]();
     cout << __FUNCTION__ <<"\n";
 }
 
-void PythonPlugin::PythonPluginImpl::onCreateToolBarItem(string pluginName)
+void PythonPlugin::PythonPluginImpl::onCreateToolBarItem(string pluginName, const string &fileName)
 {
     //mHandlers[pluginName]
-    mCreateAction("", "", pluginName, [this](string option)
+    mCreateAction("", "", pluginName, [this](string option, const string &fileName)
     {
         cout << "dupa\n";
-        onShowUI(option);
+        onShowUI(option, fileName);
     });
 }
 
-void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, string, string, function<void (string)>)> createAction)
+void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, string, string, function<void (string, const string&)>)> createAction)
 {
     PyGIL gil;
 
@@ -292,15 +298,15 @@ void PythonPlugin::PythonPluginImpl::onCreateToolBars(function<void (string, str
     for(auto &o: mHandlers){
         //o.second->
 
-        mCreateAction("", "", o.first, [this](string option)
+        mCreateAction("", "", o.first.first, [this](string option, const string &fileName)
         {
             cout << "dupa\n";
-            onShowUI(option);
+            onShowUI(option, fileName);
         });
     }
 }
 
-void PythonPlugin::PythonPluginImpl::createInstances()
+void PythonPlugin::PythonPluginImpl::createInstances(const string &fileName)
 {
     string typeName;
 
@@ -311,7 +317,7 @@ void PythonPlugin::PythonPluginImpl::createInstances()
     try {
         for(auto& t: mDerivedClassContainer){
             if(mInitialConfig[t.name]){
-                createInstance(t.type, t.name);
+                createInstance(t.type, t.name, fileName);
             }
         }
 
@@ -366,16 +372,18 @@ SearchResultArray PythonPlugin::PythonPluginImpl::doSearch(const string &fileNam
     return {};
 }
 
-void PythonPlugin::PythonPluginImpl::doGetExpandedLines(string &line)
+void PythonPlugin::PythonPluginImpl::doGetExpandedLines(string &line, const string &fileName)
 {
     PyGIL gil;
 
     for(auto &o: mHandlers){
+        if(o.first.second == fileName){
 //        if (o.second->isOnSearcAvailable()){
             if(o.second->doGetExpandedLines(line)){
                 return;
             }
 //        }
+        }
     }
 }
 
@@ -384,22 +392,22 @@ map<string, bool> PythonPlugin::PythonPluginImpl::getConfig() const
     map<string, bool> config;
 
     for(auto& t: mDerivedClassContainer){
-        config[t.name] = mHandlers.find(t.name) != mHandlers.end();
+        config[t.name] = mHandlers.find(pair<string, string>{t.name, ""}) != mHandlers.end();
     }
 
     return config;
 }
 
-void PythonPlugin::PythonPluginImpl::setPluginState(const string &typeName, bool state)
+void PythonPlugin::PythonPluginImpl::setPluginState(const string &typeName, bool state, const string &fileName)
 {
     PyGIL gil;
 
     if(not state){
         //mHandlers[typeName]->onRelease();
-        mHandlers.erase(typeName);
-        updateAppViews();
+        mHandlers.erase({typeName, fileName});
+        updateAppViews(fileName);
     }else{
-        createInstance({}, typeName);
+        createInstance({}, typeName, fileName);
     }
 }
 PythonPlugin::PythonPluginImpl::DerivedType::~DerivedType()
@@ -408,7 +416,7 @@ PythonPlugin::PythonPluginImpl::DerivedType::~DerivedType()
 }
 
 
-void PythonPlugin::onCreateToolBars(function<void(string, string, string, function<void (string)>)> createAction)
+void PythonPlugin::onCreateToolBars(function<void (string, string, string, function<void (string, const string &)>)> createAction)
 {
     if(not mPluginImpl){
         return;
@@ -417,11 +425,37 @@ void PythonPlugin::onCreateToolBars(function<void(string, string, string, functi
     mPluginImpl->onCreateToolBars(createAction);
 }
 
-void PythonPlugin::onCreateToolBarItem(string pluginName)
+void PythonPlugin::onCreateToolBarItem(string pluginName, const string &fileName)
 {
     if(not mPluginImpl){
         return;
     }
 
-    mPluginImpl->onCreateToolBarItem(pluginName);
+    mPluginImpl->onCreateToolBarItem(pluginName, fileName);
+}
+
+void PythonPlugin::onShowLogView(const string &fileName)
+{
+    if(not mPluginImpl){
+        return;
+    }
+
+    mPluginImpl->onShowLogView(fileName);
+}
+
+
+void PythonPlugin::PythonPluginImpl::onShowLogView(const string &fileName)
+{
+    cout << __FUNCTION__ << ": "<< fileName << "\n";
+    PyGIL gil;
+
+    for(auto &o: mHandlers){
+        if(o.first.second == fileName) {
+            o.second->onShowUI();
+        //if(o.second->doGetExpandedLines(line)){
+        //}
+        } else {
+            o.second->onHideUI();
+        }
+    }
 }
