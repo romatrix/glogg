@@ -39,7 +39,7 @@ public:
     PythonPlugin(const string& path, bool disablePlugins);
     void createInstances(const string &fileName);
     void onPopupMenu(AbstractLogView* alv);
-    void onCreateMenu(AbstractLogView *alv);
+    void onCreateMenu(AbstractLogView *alv, const string &viewName, const string &fileName, const string& plugin);
     bool isOnSearcAvailable();
     SearchResultArray doSearch(const string &fileName, const string &pattern, int initialLine);
     void doGetExpandedLines(string &line, const string &fileName);
@@ -97,6 +97,7 @@ private:
         function<void (string, string, string, function<void (string, bool)>)> mCreateAction;
         string mCurrentFileName;
         map<string, bool> mShowGui;
+        map<string, vector<AbstractLogView*>> mLogViewMap;
 
         void onShowUI(string pluginName, const string &fileName);
         void onHideAllUI(const string &pluginName);
@@ -105,7 +106,7 @@ private:
     public:
         void createInstances(const string &fileName) override;
         void onPopupMenu(AbstractLogView *alv) override;
-        void onCreateMenu(AbstractLogView *alv) override;
+        void onCreateMenu(AbstractLogView *alv, const string &viewName, const string &fileName, const string &plugin) override;
         bool isOnSearcAvailable() override;
         SearchResultArray doSearch(const string &fileName, const string &pattern, int initialLine) override;
         void doGetExpandedLines(string &line, const string &fileName) override;

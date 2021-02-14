@@ -359,6 +359,10 @@ protected:
                               QList<LineChunk> &outList);
 
     PythonPluginInterface* pythonPlugin_ = nullptr;
+
+    void createPluginAction(const string& pluginName, const string& menuString, const string &viewName, function<void(string, string)> action);
+    void removePluginAction(const string &pluginName);
+    map<pair<string,string>,QAction*> pluginActions_;
 };
 
 #endif

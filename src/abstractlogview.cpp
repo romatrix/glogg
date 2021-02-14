@@ -51,6 +51,7 @@
 #include "overview.h"
 #include "configuration.h"
 #include <QInputDialog>
+#include "QActionPluginMenu.h"
 
 namespace {
 int mapPullToFollowLength( int length );
@@ -290,9 +291,6 @@ void AbstractLogView::mousePressEvent( QMouseEvent* mouseEvent )
         // "Add to search" only makes sense in regexp mode
         if ( config->mainRegexpType() != ExtendedRegexp )
             addToSearchAction_->setEnabled( false );
-
-
-        pythonPlugin_->onPopupMenu(this);
 
         // Display the popup (blocking)
         popupMenu_->exec( QCursor::pos() );
@@ -1424,7 +1422,7 @@ void AbstractLogView::createMenu()
     popupMenu_->addAction( addToSearchAction_ );
     popupMenu_->addAction( addToQuickFindAction_ );
 
-    pythonPlugin_->onCreateMenu(this);
+    //pythonPlugin_->onCreateMenu(this);
 }
 
 void AbstractLogView::considerMouseHovering( int x_pos, int y_pos )
@@ -1477,6 +1475,34 @@ void AbstractLogView::mergeFilterSelection(const QList<LineChunk>& filterMatchLi
         }
     } else {
         outList = inList;
+    }
+}
+
+void AbstractLogView::createPluginAction(const string &pluginName,
+                                         const string &menuString,
+                                         const string& viewName,
+                                         function<void(string, string)> action)
+{
+    QActionPluginMenu* pluginAction = new QActionPluginMenu(pluginName, menuString, viewName, action, this);
+    pluginActions_[pair<string,string>{pluginName, viewName}] = pluginAction;
+
+    popupMenu_->addAction(pluginAction);
+}
+
+void AbstractLogView::removePluginAction(const string &pluginName)
+{
+    //QActionPluginMenu* pluginAction = new QActionPluginMenu(pluginName, menuString, viewName, action, this);
+    //pluginActions_[pair<string,string>{pluginName, viewName}] = pluginAction;
+
+    for (auto it = pluginActions_.begin(); it != pluginActions_.end(); ) {
+        if (it->first.first == pluginName) {
+            popupMenu_->removeAction(it->second);
+            delete it->second;
+            it = pluginActions_.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
 }
 

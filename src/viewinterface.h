@@ -21,11 +21,14 @@
 #define VIEWINTERFACE_H
 
 #include <memory>
+#include <string>
 
 class LogData;
 class LogFilteredData;
 class SavedSearches;
 class QuickFindPattern;
+
+using namespace std;
 
 // ViewContextInterface represents the private information
 // the concrete view will be able to save and restore.
@@ -62,6 +65,9 @@ class ViewInterface {
     // (returned object ownership is transferred to the caller)
     std::shared_ptr<const ViewContextInterface> context( void ) const
     { return doGetViewContext(); }
+
+    virtual void createPluginMenuActions(const string &fileName, const string& plugin) {}
+
 
     // To allow polymorphic destruction
     virtual ~ViewInterface() {}

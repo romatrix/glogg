@@ -232,6 +232,7 @@ protected:
 
     PythonPluginInterface* pythonPlugin_ = nullptr;
     map<string, QActionExtended*> pluginActions_;
+    void createPluginMenuActionsForAllCrawlerWidgets(const string &plugin);
 };
 
 #endif

@@ -46,13 +46,13 @@ void PythonPlugin::onPopupMenu(AbstractLogView *alv)
     mPluginImpl->onPopupMenu(alv);
 }
 
-void PythonPlugin::onCreateMenu(AbstractLogView *alv)
+void PythonPlugin::onCreateMenu(AbstractLogView *alv, const string &viewName, const string &fileName, const string& plugin)
 {
     if(not mPluginImpl){
         return;
     }
 
-    mPluginImpl->onCreateMenu(alv);
+    mPluginImpl->onCreateMenu(alv, viewName, fileName, plugin);
 }
 
 bool PythonPlugin::isOnSearcAvailable()
@@ -380,20 +380,33 @@ void PythonPlugin::PythonPluginImpl::createInstances(const string &fileName)
 
 void PythonPlugin::PythonPluginImpl::onPopupMenu(AbstractLogView *alv)
 {
-    PyGIL gil;
+//    PyGIL gil;
 
-    for(auto &o: mHandlers){
-        o.second->onPopupMenu(alv);
-    }
+//    for(auto &o: mHandlers){
+//        o.second->onPopupMenu(alv);
+//    }
 }
 
-void PythonPlugin::PythonPluginImpl::onCreateMenu(AbstractLogView *alv)
+void PythonPlugin::PythonPluginImpl::onCreateMenu(AbstractLogView *alv, const string &viewName, const string &fileName, const string& plugin)
 {
     PyGIL gil;
+    string pluginName;
 
     for(auto &o: mHandlers){
-        o.second->onCreateMenu(alv);
+        if(o.first.second == fileName && (o.first.first == plugin || not plugin.length() )){
+            string menuString = o.second->onCreateMenu(viewName);
+            pluginName = o.first.first;
+            if(menuString.length()){
+                mLogViewMap[o.first.first].push_back(alv);
+                alv->createPluginAction(o.first.first, menuString, viewName, [this](string pluginName, string viewName)
+                {
+                    PyGIL gil;
+                    mHandlers[pair<string,string>{pluginName, mCurrentFileName}]->onPopupMenu(viewName);
+                });
+            }
+        }
     }
+
 }
 
 bool PythonPlugin::PythonPluginImpl::isOnSearcAvailable()
@@ -428,11 +441,9 @@ void PythonPlugin::PythonPluginImpl::doGetExpandedLines(string &line, const stri
 
     for(auto &o: mHandlers){
         if(o.first.second == fileName){
-//        if (o.second->isOnSearcAvailable()){
             if(o.second->doGetExpandedLines(line)){
                 return;
             }
-//        }
         }
     }
 }
@@ -458,15 +469,18 @@ void PythonPlugin::PythonPluginImpl::setPluginState(const string &typeName, bool
     PyGIL gil;
 
     if(not state){
-        //mHandlers[typeName]->onRelease();
-        //mHandlers.erase({typeName, fileName});
-        //for(auto)
         for (auto it = mHandlers.begin(); it != mHandlers.end(); ) {
             if (it->first.first == typeName)
                 it = mHandlers.erase(it);
             else
                 ++it;
         }
+
+        for(AbstractLogView* alv: mLogViewMap[typeName]){
+            alv->removePluginAction(typeName);
+        }
+
+        mLogViewMap.erase(typeName);
 
         updateAppViews(mCurrentFileName);
     }else{

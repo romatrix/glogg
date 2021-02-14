@@ -60,8 +60,8 @@ public:
     static std::mutex pyContextLock;
     void onRelease() override;
 
-    void onPopupMenu(AbstractLogView *alv);
-    void onCreateMenu(AbstractLogView *alv);
+    void onPopupMenu(const string &viewName);
+    string onCreateMenu(const string &viewName);
     bool isOnSearcAvailable();
     SearchResultArray onSearch(const string &fileName, const string &pattern, int initialLine);
     bool doGetExpandedLines(string &line);

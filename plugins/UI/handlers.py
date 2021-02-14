@@ -14,9 +14,6 @@ class glogg(PyHandler):
     def on_popup_menu(self):
         print("on_popup_menu")
 
-    def on_create_menu(self):
-        print("on_create_menu")
-
 #    def on_display_line(self, line):
 #        print("on_display_line", line)
 #        # cmd = "echo " + line + " | cut -f1 -d' '"
@@ -35,8 +32,20 @@ class UI(PyHandler):
         self.myapp = PyDialog.MyForm(self)
         #self.myapp.show()
 
-    # def on_popup_menu(self):
-    #     print("on_popup_menu UI")
+    def on_create_menu_main_view(self):
+        print("on_create_menu main")
+        return "UI menu main"
+
+    def on_create_menu_filtered_view(self):
+        print("on_create_menu")
+        return "UI menu filtered"
+
+    def on_popup_menu_main_view(self):
+        print("on_popup_menu main view UI")
+
+    def on_popup_menu_filtered_view(self):
+        print("on_popup_menu filtered view UI")
+
     #     #myapp.show()
     #     print(self.myapp.getValue())
 

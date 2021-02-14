@@ -19,7 +19,7 @@ public:
 
     virtual void createInstances(const string &fileName) = 0;
     virtual void onPopupMenu(AbstractLogView* alv) = 0;
-    virtual void onCreateMenu(AbstractLogView *alv) = 0;
+    virtual void onCreateMenu(AbstractLogView *alv, const string &viewName, const string &fileName, const string& plugin) = 0;
     virtual bool isOnSearcAvailable() = 0;
     virtual SearchResultArray doSearch(const string &fileName, const string &pattern, int initialLine) = 0;
     virtual void doGetExpandedLines(string &line, const string &fileName) = 0;

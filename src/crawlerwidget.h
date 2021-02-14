@@ -309,6 +309,10 @@ class CrawlerWidget : public QSplitter,
 
     PythonPluginInterface* pythonPlugin_ = nullptr;
     string fileName_;
+
+    // ViewInterface interface
+public:
+    void createPluginMenuActions(const string &fileName, const string& plugin) override;
 };
 
 #endif

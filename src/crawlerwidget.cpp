@@ -1299,3 +1299,15 @@ std::string CrawlerWidgetContext::toString() const
 
     return { string };
 }
+
+
+void CrawlerWidget::createPluginMenuActions(const string &fileName, const string &plugin)
+{
+    if(fileName.length()) {
+        pythonPlugin_->onCreateMenu(logMainView, "main_view", fileName, plugin);
+        pythonPlugin_->onCreateMenu(filteredView, "filtered_view", fileName, plugin);
+    } else {
+        pythonPlugin_->onCreateMenu(logMainView, "main_view", fileName_, plugin);
+        pythonPlugin_->onCreateMenu(filteredView, "filtered_view", fileName_, plugin);
+    }
+}

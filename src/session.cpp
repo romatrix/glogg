@@ -205,6 +205,7 @@ ViewInterface* Session::openAlways( const std::string& file_name,
 
     // Start loading the file
     log_data->attachFile( QString( file_name.c_str() ) );
+    view->createPluginMenuActions(file_name, "");
 
     return view;
 }

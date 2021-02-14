@@ -32,6 +32,10 @@ private slots:
 
     void on_listWidget_itemClicked(QListWidgetItem *item);
 
+    void on_listWidget_currentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+
+    void on_listWidget_itemChanged(QListWidgetItem *item);
+
 private:
     Ui::PluginsDialog *ui;
 private:
@@ -39,6 +43,7 @@ private:
 
     std::shared_ptr<PluginSet> pluginSet_;
     PythonPluginInterface* pythonPlugin_;
+    bool enableItemChangeHandler = false;
 };
 
 #endif // PLUGINSDIALOG_H

@@ -67,27 +67,34 @@ bool PyHandler::onTrigger(int index)
     return ret;
 }
 
-void PyHandler::onPopupMenu(AbstractLogView* alv)
+void PyHandler::onPopupMenu(const string& viewName)
 {
     auto ul = std::unique_lock<std::mutex>(pyContextLock);
 
-    if(PyObject_HasAttrString(mObj->ptr(), on_popup_menu)){
+    const string methodName = string(on_popup_menu) + "_" + viewName;
+
+    if(PyObject_HasAttrString(mObj->ptr(), methodName.c_str())){
 
 //        cout << __FUNCTION__ << " call python, index: " << index << "\n";
-        mObj->attr(on_popup_menu)();
+        mObj->attr(methodName.c_str())();
     }
 }
 
-void PyHandler::onCreateMenu(AbstractLogView* alv)
+string PyHandler::onCreateMenu(const string &viewName)
 {
     std::unique_lock<std::mutex>(pyContextLock);
+    string ret;
 
-    if(PyObject_HasAttrString(mObj->ptr(), on_create_menu)){
+    const string methodName = string(on_create_menu) + "_" + viewName;
+
+    if(PyObject_HasAttrString(mObj->ptr(), methodName.c_str())){
 
 //        cout << __FUNCTION__ << " call python, index: " << index << "\n";
-        mObj->attr(on_create_menu)();
+        boost::python::object o = mObj->attr(methodName.c_str())();
+        ret = extract<string>(o);
     }
 
+    return ret;
 }
 
 bool PyHandler::onTriggerAction(const string& action, const string& data)

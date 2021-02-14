@@ -663,6 +663,7 @@ void MainWindow::applyPluginConfiguration(string pluginName, bool state)
         toolBar->removeAction(pluginActions_[pluginName]);
         pluginActions_[pluginName] = nullptr;
     } else {
+        createPluginMenuActionsForAllCrawlerWidgets(pluginName);
         pythonPlugin_->onCreateToolBarItem(pluginName, "");
     }
 }
@@ -877,9 +878,11 @@ void MainWindow::newVersionNotification( const QString& new_version )
 // Closes the application
 void MainWindow::closeEvent( QCloseEvent *event )
 {
+    writeSettings();
+
     delete pythonPlugin_;
     pythonPlugin_ = nullptr;
-    writeSettings();
+
     event->accept();
 }
 
@@ -995,6 +998,14 @@ CrawlerWidget* MainWindow::currentCrawlerWidget() const
             mainTabWidget_.currentWidget() );
 
     return current;
+}
+
+void MainWindow::createPluginMenuActionsForAllCrawlerWidgets(const string& plugin)
+{
+    for(int i = 0; i < mainTabWidget_.count(); ++i){
+        CrawlerWidget* w = dynamic_cast<CrawlerWidget*>(mainTabWidget_.widget(i));
+        w->createPluginMenuActions("", plugin);
+    }
 }
 
 // Update the title bar.
