@@ -18,12 +18,14 @@ using namespace boost::python;
 #endif
 
 
-PythonPlugin::PythonPlugin()
+PythonPlugin::PythonPlugin(const string &path, bool disablePlugins): mPath(path)
 {
     using namespace boost::python;
 
-    GetPersistentInfo().retrieve("pluginSet");
-    enable(Persistent<PluginSet>( "pluginSet" )->isPluginSystemEnabled());
+    if(not disablePlugins){
+        GetPersistentInfo().retrieve("pluginSet");
+        enable(Persistent<PluginSet>( "pluginSet" )->isPluginSystemEnabled());\
+    }
 }
 
 void PythonPlugin::createInstances(const string& fileName)
@@ -103,7 +105,7 @@ void PythonPlugin::enable(bool set)
     if(set){
         GetPersistentInfo().retrieve("pluginSet");
 
-        mPluginImpl = make_unique<PythonPluginImpl>(Persistent<PluginSet>( "pluginSet" )->getPlugins());
+        mPluginImpl = make_unique<PythonPluginImpl>(Persistent<PluginSet>( "pluginSet" )->getPlugins(), mPath);
     }else{
         mPluginImpl.reset();
     }
@@ -153,7 +155,7 @@ vector<string> getPythonPluginFilePaths(const string dir)
 {
     vector<string> ret;
 
-    cout << "Looking for python plugins files:\n";
+    cout << "Looking for python plugins files in :" << dir << "\n";
 
     for(auto & entry : boost::filesystem::directory_iterator( dir )){
         if(entry.path().extension() == ".py"){
@@ -165,7 +167,31 @@ vector<string> getPythonPluginFilePaths(const string dir)
     return ret;
 }
 
-PythonPlugin::PythonPluginImpl::PythonPluginImpl(const map<string, bool> &config):mInitialConfig(config)
+void addPythonPluginPaths(const string& dir)
+{
+    PyObject* sysPath = PySys_GetObject("path");
+
+    for (auto & entry : boost::filesystem::directory_iterator(dir)){
+        if(boost::filesystem::is_directory(entry)){
+            cout << entry.path() << '\n';
+            PyList_Insert( sysPath, 0, PyUnicode_FromString(entry.path().string().c_str()));
+        }
+    }
+}
+
+void loadPythonPluginFiles(const string& dir, dict& main_namespace)
+{
+    for (auto & entry : boost::filesystem::directory_iterator(dir)){
+        if(boost::filesystem::is_directory(entry)){
+            for(const auto file: getPythonPluginFilePaths(entry.path().string())){
+                cout << "Loading plugin file to python namespace: " << file << "\n";
+                exec_file(file.c_str(), main_namespace, main_namespace);
+            }
+        }
+    }
+}
+
+PythonPlugin::PythonPluginImpl::PythonPluginImpl(const map<string, bool> &config, const string &path):mInitialConfig(config)
 {
     using namespace boost::python;
 
@@ -174,14 +200,7 @@ PythonPlugin::PythonPluginImpl::PythonPluginImpl(const map<string, bool> &config
         Py_Initialize();
         PyEval_InitThreads();
 
-        boost::filesystem::path workingDir = boost::filesystem::absolute("").normalize();
-
-        string s= workingDir.string() + "/plugins";
-        cout << "WorkDir: " << s << "\n";
-
-
-        PyObject* sysPath = PySys_GetObject("path");
-        PyList_Insert( sysPath, 0, PyUnicode_FromString(/*workingDir.string()*/s.c_str()));
+        addPythonPluginPaths(path);
 
         object main_module = import("__main__");
         dict main_namespace = extract<dict>(main_module.attr("__dict__"));
@@ -189,13 +208,11 @@ PythonPlugin::PythonPluginImpl::PythonPluginImpl(const map<string, bool> &config
         object mymodule = import("PyHandler");
         dict mymodule_namespace = extract<dict>(mymodule.attr("__dict__"));
         object BaseClass = mymodule_namespace["PyHandler"];
-        //object VerifierBaseClass = mymodule_namespace["PyTestVerifier"];
+            //object VerifierBaseClass = mymodule_namespace["PyTestVerifier"];
 
         cout <<"\n";
-        for(const auto file: getPythonPluginFilePaths(s)){
-            cout << "Loading plugin file to python namespace: " << file << "\n";
-            exec_file(file.c_str(), main_namespace, main_namespace);
-        }
+
+        loadPythonPluginFiles(path, main_namespace);
 
         PyTypeObject* base_class = reinterpret_cast<PyTypeObject*>(BaseClass.ptr());
         //PyTypeObject* verifier_base_class = reinterpret_cast<PyTypeObject*>(VerifierBaseClass.ptr());

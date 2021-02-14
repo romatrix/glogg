@@ -36,7 +36,7 @@ struct PyGIL {
 class PythonPlugin: public PythonPluginInterface
 {
 public:
-    PythonPlugin();
+    PythonPlugin(const string& path, bool disablePlugins);
     void createInstances(const string &fileName);
     void onPopupMenu(AbstractLogView* alv);
     void onCreateMenu(AbstractLogView *alv);
@@ -52,6 +52,8 @@ public:
     void updateAppViews(const string& fileName) override;
 
 private:
+
+    const string mPath;
 
     struct PythonPluginImpl: public PythonPluginInterface
     {
@@ -69,7 +71,7 @@ private:
         };
 
         PythonPluginImpl() = default;
-        PythonPluginImpl(const map<string, bool>& config);
+        PythonPluginImpl(const map<string, bool>& config, const string& path);
         ~PythonPluginImpl();
         void createInstance(boost::optional<boost::python::object> type, const string &typeName, const string &fileName);
 

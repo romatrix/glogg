@@ -23,6 +23,7 @@
 #include <memory>
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 namespace po = boost::program_options;
 
 #include <iostream>
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
     bool new_session = false;
     bool load_session = false;
     bool multi_instance = false;
+    bool disable_plugins = false;
+    string plugins_path;
 #ifdef _WIN32
     bool log_to_file = false;
 #endif
@@ -88,6 +91,7 @@ int main(int argc, char *argv[])
             ("log,l", "save the log to a file (Windows only)")
 #endif
             ("debug,d", "output more debug (include multiple times for more verbosity e.g. -dddd)")
+            ("disable-plugins", "disable plugin system")
             ;
         po::options_description desc_hidden("Hidden options");
         // For -dd, -ddd...
@@ -96,6 +100,7 @@ int main(int argc, char *argv[])
 
         desc_hidden.add_options()
             ("input-file", po::value<vector<string>>(), "input file")
+            ("plugins-path", po::value<string>(), "path to directory with plugins")
             ;
 
         po::options_description all_options("all options");
@@ -150,6 +155,16 @@ int main(int argc, char *argv[])
 
         if ( vm.count("input-file") ) {
             filenames = vm["input-file"].as<vector<string>>();
+        }
+
+        if(vm.count("disable-plugins")) {
+            disable_plugins = true;
+            cout << "disable-plugins: " << disable_plugins << "\n";
+        }
+
+        if(vm.count("plugins-path")) {
+            plugins_path = vm["plugins-path"].as<string>();
+            cout << "plugins-path: " << plugins_path << "\n";
         }
     }
     catch(exception& e) {
@@ -258,7 +273,21 @@ int main(int argc, char *argv[])
     // FIXME: should be replaced by a two staged init of MainWindow
     GetPersistentInfo().retrieve( QString( "settings" ) );
 
-    PythonPlugin *pythonPlugin = new PythonPlugin;
+
+    if(not plugins_path.length()){
+        cout << argv[0] << "\n";
+        string execDir = string(argv[0]);
+        execDir = execDir.substr(0, execDir.find_last_of('/'));
+        plugins_path = execDir + "/plugins";
+    } else {
+        boost::filesystem::path absolutePath = boost::filesystem::absolute(plugins_path).normalize();
+        plugins_path = absolutePath.string();
+    }
+
+    cout << "plugins_path absolute: "<< plugins_path << "\n";
+
+    //return 0;
+    PythonPlugin *pythonPlugin = new PythonPlugin(plugins_path, disable_plugins);
     //pythonPlugin->createInstances("");
     std::unique_ptr<Session> session( new Session(pythonPlugin) );
     MainWindow mw(pythonPlugin, std::move( session ), externalCommunicator );

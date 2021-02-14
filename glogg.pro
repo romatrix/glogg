@@ -368,9 +368,7 @@ perf {
 }
 
 DISTFILES += \
-    debug/handlers.py \
-    debug/handlers2.py \
-    plugins/handlers.py \
-    plugins/handlers2.py \
-    plugins/PyDialog.py \
-    plugins/PyDialog_ui.py
+    plugins/UI/handlers.py \
+    plugins/glogg2/handlers2.py \
+    plugins/UI/PyDialog.py \
+    plugins/UI/PyDialog_ui.py
