@@ -37,7 +37,7 @@ bool GloggApp::event( QEvent *event )
 
 bool GloggApp::notify(QObject *o, QEvent *e)
 {
-    if(o->inherits("QDialog") and e->type() == QEvent::Type::Hide){
+    if(o->inherits("QDialog") and e->type() == QEvent::Type::Close){
         //cout << "show: " <<  << "\n";
         QDialog* dlg = ((QDialog*)o);
         //dlg->setWindowTitle("Tada");

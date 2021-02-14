@@ -599,7 +599,7 @@ void MainWindow::onHideDialog(const string& dialogTitle)
     cout << __FUNCTION__ << ": " << dialogTitle << "\n";
     if(pluginActions_.find(dialogTitle) != pluginActions_.end()){
         pluginActions_[dialogTitle]->setChecked(false);
-        //pluginActions_[dialogTitle]->hide();
+        pluginActions_[dialogTitle]->hide();
     }
 }
 
